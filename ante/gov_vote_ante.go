@@ -105,8 +105,8 @@ func (g GovVoteDecorator) validMsg(ctx sdk.Context, m sdk.Msg) error {
 		return nil
 	}
 
-	if minStakedTokens.IsZero() {
-		return nil
+	if minStakedTokens.IsZero() || minStakedTokens.IsNegative() {
+		return errorsmod.Wrap(gaiaerrors.ErrLogic, "minStakedTokens must be set to a positive value")
 	}
 
 	enoughStake := false
@@ -136,7 +136,7 @@ func (g GovVoteDecorator) validMsg(ctx sdk.Context, m sdk.Msg) error {
 	}
 
 	if !enoughStake {
-		return errorsmod.Wrapf(gaiaerrors.ErrInsufficientStake, "insufficient stake for voting - min required %v", minStakedTokens)
+		return errorsmod.Wrapf(gaiaerrors.ErrInsufficientStake, "insufficient stake for voting - min required %v, checked %d delegations", minStakedTokens, delegationCount)
 	}
 
 	return nil
